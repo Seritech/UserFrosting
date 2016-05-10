@@ -125,7 +125,7 @@
     $app->get('/users/?', function () use ($app) {
         $controller = new UF\UserController($app);
         return $controller->pageUsers();
-    })->name('uri_users');    
+    })->name('uri_users');
 
     // List users in a particular primary group
     $app->get('/users/:primary_group/?', function ($primary_group) use ($app) {
@@ -179,9 +179,53 @@
         $controller = new UF\UserController($app);
         return $controller->deleteUser($user_id);
     });
-    
+
+    /********** TOKENS MANAGEMENT INTERFACE **********/
+
+    // List tokens
+    $app->get('/tokens/?', function () use ($app) {
+        $controller = new UF\TokenController($app);
+        return $controller->pageTokens();
+    })->name('uri_tokens');
+
+    // Token creation form
+    $app->get('/forms/tokens/?', function () use ($app) {
+        $controller = new UF\TokenController($app);
+        return $controller->formTokenCreate();
+    });
+
+    // Token edit form
+    $app->get('/forms/tokens/t/:token_id/?', function ($token_id) use ($app) {
+        $controller = new UF\TokenController($app);
+        return $controller->formTokenEdit($token_id);
+    });
+
+    // Create token
+    $app->post('/tokens/?', function () use ($app) {
+        $controller = new UF\TokenController($app);
+        return $controller->createToken();
+    });
+
+    // Update token
+    $app->post('/tokens/t/:token_id/?', function ($token_id) use ($app) {
+        $controller = new UF\TokenController($app);
+        return $controller->updateToken($token_id);
+    });
+
+    // Reset token
+    $app->post('/tokens/t/:token_id/reset/?', function ($token_id) use ($app) {
+        $controller = new UF\TokenController($app);
+        return $controller->resetToken($token_id);
+    });
+
+    // Delete token
+    $app->post('/tokens/t/:token_id/delete/?', function ($token_id) use ($app) {
+        $controller = new UF\TokenController($app);
+        return $controller->deleteToken($token_id);
+    });
+
     /********** GROUP MANAGEMENT INTERFACE **********/
-    
+
     // List groups
     $app->get('/groups/?', function () use ($app) {
         $controller = new UF\GroupController($app);
@@ -360,8 +404,12 @@
         $controller = new UF\ApiController($app);
         $controller->listUsers();
     });
-    
-    
+
+    $app->get('/api/tokens/?', function () use ($app) {
+        $controller = new UF\ApiController($app);
+        $controller->listTokens();
+    });
+
     /************ MISCELLANEOUS UTILITY ROUTES *************/
     
     // Generic confirmation dialog

@@ -264,7 +264,8 @@ abstract class Database {
           (2, 'update_account_setting', '!in_group(user.id,2)&&in(property,[\"email\",\"display_name\",\"title\",\"locale\",\"flag_password_reset\",\"flag_enabled\"])'),
           (2, 'view_account_setting', 'in(property,[\"user_name\",\"email\",\"display_name\",\"title\",\"locale\",\"flag_enabled\",\"groups\",\"primary_group_id\"])'),
           (2, 'delete_account', '!in_group(user.id,2)'),
-          (2, 'create_account', 'always()');");    
+          (2, 'create_account', 'always()');
+          (2, 'uri_tokens', 'always()');");
     }
     
 }

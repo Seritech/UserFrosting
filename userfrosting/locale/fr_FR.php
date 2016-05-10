@@ -19,6 +19,7 @@ $lang = array_merge($lang, [
 	"MENU_CONFIGURATION" => "Configuration",
 	"MENU_SITE_SETTINGS" => "Préférences du site",
 	"MENU_GROUPS" => "Groupes",
+    "MENU_TOKENS" => "API Tokens",
 	"HEADER_MESSAGE_ROOT" => "VOUS ÊTES CONNECTÉ EN TANT QU'ADMINISTRATEUR ROOT"
 ]);
 // Installer
@@ -158,4 +159,15 @@ $lang = array_merge($lang,array(
     "GROUP_AUTH_UPDATE_SUCCESSFUL" => "La règle autorisant l'accès au groupe '{{name}}' pour le hook '{{hook}}' a été mise à jour avec succès.",
     "GROUP_AUTH_DELETION_SUCCESSFUL" => "La règle autorisant l'accès au groupe '{{name}}' pour le hook '{{hook}}' a été supprimée avec succès."
 ));
+
+$lang = array_merge(
+    $lang,
+    [
+        'TOKEN_CREATION_COMPLETE'   => 'La clé API a été créée',
+        'TOKEN_DETAILS_UPDATED'     => 'La clé API pour {{app_name}} a été modifiée',
+        'TOKEN_DELETION_SUCCESSFUL' => 'La clé API pour {{app_name}} a été supprimée',
+        'TOKEN_RESET_SUCCESSFUL'    => 'La clé API pour {{app_name}} a été réinitialisée',
+        'TOKEN_APPNAME_IN_USE'      => 'Le nom d\'application est déjà utilisé'
+    ]
+);
 return $lang;

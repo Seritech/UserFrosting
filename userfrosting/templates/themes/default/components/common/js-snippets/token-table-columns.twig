@@ -1,0 +1,84 @@
+{# This contains a series of <script> blocks, each of which is a client-side Handlebars template. #}
+{% verbatim %}
+<script id="token-table-column-info" type="text/x-handlebars-template">
+    <td data-text="{{token.app_name}}">
+        <strong>{{token.app_name}} ({{token.display_name}})</strong>
+    </td>
+</script>
+
+<script id="token-table-column-token" type="text/x-handlebars-template">
+    <td data-text="{{token.token}}">
+        {{token.token}}
+    </td>
+</script>
+
+<script id="token-table-column-registered-since" type="text/x-handlebars-template">
+    {{#if token.sign_up_time }}
+    <td data-num="{{dateFormat token.sign_up_time format='x'}}">
+        {{dateFormat token.sign_up_time format="dddd"}}<br>{{dateFormat token.sign_up_time format="MMM Do, YYYY h:mm a"}}
+    </td>
+    {{ else }}
+    <td data-num="0">
+            <i>Unknown</i>
+    </td>
+    {{/if }}
+</script>
+
+<script id="token-table-column-last-sign-in" type="text/x-handlebars-template">
+    {{#if token.last_sign_in_time }}
+    <td data-num="{{dateFormat token.last_sign_in_time format='x'}}">
+        {{dateFormat token.last_sign_in_time format="dddd"}}<br>{{dateFormat token.last_sign_in_time format="MMM Do, YYYY h:mm a"}}
+    </td>
+    {{ else }}
+    <td data-num="0">
+            <i>Brand new!</i>
+    </td>
+    {{/if }}
+</script>
+
+<script id="token-table-column-actions" type="text/x-handlebars-template">
+    <td>
+        <div class="btn-group">
+            {{#ifCond user.flag_enabled 0 }}
+                <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown">
+                    Disabled
+                    <span class="caret"></span>
+                </button>
+            {{ else }}
+                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                    Enabled
+                    <span class="caret"></span>
+                </button>
+            {{/ifCond }}
+            <ul class="dropdown-menu" role="menu">
+                <li>
+                    <a href="#" data-id="{{token.id}}" class="js-token-edit" data-target="#dialog-token-edit" data-toggle="modal">
+                        <i class="fa fa-edit"></i> Edit
+                    </a>
+                </li>
+                <li>
+                    <a href="#" data-id="{{token.id}}" class="js-token-reset" data-target="#dialog-token-reset" data-toggle="modal">
+                        <i class="fa fa-key"></i> Reset
+                    </a>
+                </li>
+                <li>
+                {{#ifCond token.flag_enabled 1 }}
+                    <a href="#" data-id="{{token.id}}" class="js-token-disable">
+                        <i class="fa fa-minus-circle"></i> Disable
+                    </a>
+                {{ else }}
+                    <a href="#" data-id="{{token.id}}" class="js-token-enable">
+                        <i class="fa fa-plus-circle"></i> Enable
+                    </a>
+                {{/ifCond }}
+                </li>
+                <li>
+                    <a href="#" data-id="{{token.id}}" class="js-token-delete" data-app_name="{{token.app_name}}" data-target="#dialog-token-delete" data-toggle="modal">
+                        <i class="fa fa-trash-o"></i> Delete
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </td>
+</script>
+{% endverbatim %}

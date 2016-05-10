@@ -1,0 +1,52 @@
+{
+    "display_name" : {
+        "validators" : {
+            "length" : {
+                "min" : 1,
+                "max" : 50,
+                "message" : "ACCOUNT_DISPLAY_CHAR_LIMIT"
+            }
+        },
+        "sanitizers" : {
+            "raw" : ""
+        }
+    },
+    "password" : {
+        "validators" : {
+            "length" : {
+                "min" : 8,
+                "max" : 50,
+                "message" : "ACCOUNT_PASS_CHAR_LIMIT"
+            }
+        },
+        "sanitizers" : {
+            "raw" : {}
+        }
+    },
+    "passwordc" : {
+        "validators" : {
+            "matches" : {
+                "field" : "password",
+                "message" : "ACCOUNT_PASS_MISMATCH"
+            },
+            "length" : {
+                "min" : 8,
+                "max" : 50,
+                "message" : "ACCOUNT_PASS_CHAR_LIMIT"
+            }
+        },
+        "sanitizers" : {
+            "raw" : {}
+        }
+    },
+    "flag_enabled" : {
+        "validators" : {
+            "member_of" : {
+                "values" : [
+                    "0", "1"
+                ],
+                "message" : "VALIDATE_BOOLEAN" 
+            }
+        }
+    }
+}

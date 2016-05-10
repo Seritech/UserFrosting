@@ -19,6 +19,11 @@
             <a href="{{site.uri.public}}/users"><i class="fa fa-users fa-fw"></i> {{ translate("MENU_USERS") }}</a>
         </li>
         {% endif %}
+        {% if checkAccess('uri_tokens') %}
+        <li>
+            <a href="{{site.uri.public}}/tokens"><i class="fa fa-user-secret fa-fw"></i> {{ translate("MENU_TOKENS") }}</a>
+        </li>
+        {% endif %}
         {% if checkAccess('uri_site_settings') or checkAccess('uri_manage_groups') %}
         <li>
             <a href="#"><i class="fa fa-wrench fa-fw"></i> {{ translate("MENU_CONFIGURATION") }}<span class="fa arrow"></span></a>

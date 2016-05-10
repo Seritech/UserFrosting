@@ -1,0 +1,211 @@
+{% extends "layouts/layout-dashboard.twig" %}
+{% set page_group = "token" %}
+
+{# Set page properties (page.*) here. #}
+{% block page %}
+    {# By putting this in a special block, we ensure that it will be set AFTER the default values are set in the parent template, 
+    but BEFORE the page itself is rendered. #}    
+    {% set page = page | merge({
+        "title"       : box_title,
+        "description" : "A listing of the API tokens for your site.  Provides management tools including the ability to edit tokens, manually activate tokens, enable/disable tokens, and more."
+    }) %}
+    {{ parent() }}
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+        <div class='panel panel-primary'>
+        <div class='panel-heading panel-heading-buttons clearfix'>
+            <h3 class='panel-title pull-left'><i class='{{icon}}'></i> {{box_title}}</h3>
+        </div>
+        <div class='panel-body'>
+            <div class="table-responsive">
+                <table id="table-tokens" class="tablesorter table table-bordered table-hover table-striped" data-sortlist="[[0, 0]]">
+                    <thead>
+                        <tr>
+                            <th class="sorter-metatext" data-column-name="app_name">App name <i class="fa fa-sort"></i></th>
+                            <th data-column-name="token">Token</th>
+                            <th class="sorter-metanum" data-column-name="sign_up_time">Registered Since <i class="fa fa-sort"></i></th>
+                            <th class="sorter-metanum" data-column-name="last_sign_in_time">Last usage <i class="fa fa-sort"></i></th>
+                            <th data-column-name="flag_enabled">Status/Actions <i class="fa fa-sort"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {# If we are not using server-side pagination, then just render all results immediately #}
+                    {% if not paginate_server_side %}
+                        {% for token in tokens %}
+                        <tr>
+                            <td data-text="{{token.app_name}}">
+                                <strong>
+                                    <a href="{{site.uri.public}}/tokens/u/{{token.id}}">{{token.app_name}} ({{token.display_name}})</a>
+                                </strong>
+                            </td>
+                            <td>{{ token.token }}<td>
+                            {% if token.sign_up_time %}
+                            <td data-num="{{token.sign_up_time | date('U')}}">
+                                {{token.sign_up_time | date("l")}}<br/>{{token.sign_up_time | date("M j, Y g:i a")}}
+                            </td>
+                            {% else %}
+                            <td data-num="0">
+                                    <i>Unknown</i>
+                            </td>
+                            {% endif %}
+                            {% if token.last_sign_in_time %}
+                            <td data-num="{{token.last_sign_in_time | date('U')}}">
+                                {{token.last_sign_in_time | date("l")}}<br>{{token.last_sign_in_time | date("M j, Y g:i a")}}
+                            </td>
+                            {% else %}
+                            <td data-num="0">
+                                    <i>Brand new!</i>
+                            </td>
+                            {% endif %}
+                            <td>
+                                <div class="btn-group">
+                                    {% if token.flag_enabled == 0 %}
+                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                            Disabled
+                                            <span class="caret"></span>
+                                        </button>
+                                    {% else %}
+                                        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                                            Enabled
+                                            <span class="caret"></span>
+                                        </button>
+                                    {% endif %}
+                                    <ul class="dropdown-menu" role="menu">
+                                        <li>
+                                            <a href="#" data-id="{{token.id}}" class="js-token-edit" data-target="#dialog-token-edit" data-toggle="modal">
+                                            <i class="fa fa-edit"></i> Edit token
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#" data-id="{{token.id}}" class="js-token-reset" data-target="#dialog-token-reset" data-toggle="modal">
+                                            <i class="fa fa-key"></i> Reset token
+                                            </a>
+                                        </li>
+                                        <li>
+                                        {% if token.flag_enabled == 1 %}
+                                            <a href="#" data-id="{{token.id}}" class="js-token-disable">
+                                            <i class="fa fa-minus-circle"></i> Disable token
+                                            </a>
+                                        {% else %}
+                                            <a href="#" data-id="{{token.id}}" class="js-token-enable">
+                                            <i class="fa fa-plus-circle"></i> Enable token
+                                            </a> 
+                                        {% endif %}
+                                        </li>
+                                        <li>
+                                            <a href="#" data-id="{{token.id}}" class="js-token-delete" data-app_name="{{token.app_name}}" data-target="#dialog-token-delete" data-toggle="modal">
+                                            <i class="fa fa-trash-o"></i> Delete token</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% endif %}
+                    </tbody>
+                </table>
+                {% include 'components/common/table-tablesorter-default.twig' with {'pager_id' : 'table-tokens-pager'} %}
+            </div>
+            <div class="row">
+                <div class="col-md-6 ">
+                    <button type="button" class="btn btn-success js-token-create" data-toggle="modal" data-target="#dialog-token-create">
+                        <i class="fa fa-plus-square"></i>  Create New Token
+                    </button>
+                </div>
+                <div class="col-md-6 text-right ">
+                    <a href="#">View All tokens <i class="fa fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+        </div>
+        </div>
+        </div>
+    </div>
+{% endblock %}
+{% block page_scripts %}
+        <!-- Include JS snippets -->
+        {% include 'components/common/js-snippets/token-table-columns.twig' %}
+
+        <script>
+            // These options get set by Twig when the page is rendered
+            var paginate_server_side = {{ paginate_server_side | default("false") }};
+            var table_id = "table-tokens";
+
+            $(document).ready(function() {
+
+                // Callback for generating the AJAX url
+                function ajaxGenerateUrlCallback(table, url) {
+                    var table_state = getTableStateVars(table);
+                    $.extend(table.config.pager.ajaxObject.data, table_state);
+                    return url;
+                }
+
+                // Callback for processing data returned from API
+                function ajaxProcessingCallback(data) {
+                    var $table = $(this);
+                    if (data) {
+                        var col, row, txt,
+                            // make # column show correct value
+                            index = $('#' + table_id)[0].config.pager.page,
+                            json = {},
+                            rows = '';
+                        size = data['rows'].length;
+                        // Render table cells via Handlebars
+                        var template_0 = Handlebars.compile($("#token-table-column-info").html());
+                        var template_1 = Handlebars.compile($("#token-table-column-token").html());
+                        var template_2 = Handlebars.compile($("#token-table-column-registered-since").html());
+                        var template_3 = Handlebars.compile($("#token-table-column-last-sign-in").html());
+                        var template_4 = Handlebars.compile($("#token-table-column-actions").html());
+                        for (row = 0; row < size; row++){
+                            rows += '<tr>';
+                            var cell_data = {
+                                "token" : data['rows'][ row ],       // It is safe to use the data from the API because Handlebars escapes HTML
+                                "site" : site
+                            };
+                            rows += template_0(cell_data);
+                            rows += template_1(cell_data);
+                            rows += template_2(cell_data);
+                            rows += template_3(cell_data);
+                            rows += template_4(cell_data);
+                            rows += '</tr>';
+                        }
+                        json.total = data['count'];  // Get total rows without pagination
+                        json.rows = $(rows);
+                        return json;
+                    }
+                }
+
+                function ajaxSetupCallback() {
+                    if (paginate_server_side) {
+                        var ajax_pager_options = {
+                            ajaxUrl: site['uri']['public'] + "/api/tokens?",
+                            // Generate the URL for the AJAX request, with the relevant parameters
+                            customAjaxUrl: ajaxGenerateUrlCallback,
+                            ajaxObject: {
+                                data: {
+                                    // rows   : size, // this doesn't work because size can't be updated dynamically
+                                }
+                            },
+                            ajaxProcessing: ajaxProcessingCallback
+                        };
+                        return ajax_pager_options;
+                    } else {
+                        return {};
+                    }
+                }
+
+                function pagerCompleteCallback() {
+                    // Link row buttons
+                    if (paginate_server_side) {
+                        bindTokenTableButtons($('#' + table_id));
+                    }
+                }
+
+                ufTable('table-tokens', ajaxSetupCallback, pagerCompleteCallback);
+            });
+        </script>
+
+{% endblock %}
+

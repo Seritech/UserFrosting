@@ -1,0 +1,101 @@
+<form name="token" method="post" action="{{form_action}}">
+    <div id="{{alerts_id | default('form-alerts')}}">
+    </div>
+    <div class="row">
+        {% if 'app_name' not in fields.hidden %}
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label>App name</label>
+                <div class="input-group">
+                    <span class="input-group-addon"><i class="fa fa-edit"></i></span>
+                    <input type="text" class="form-control" name="app_name" autocomplete="off" value="{{target_token.app_name}}" placeholder="Please enter the application name" {% if 'app_name' in fields.disabled %}disabled{% endif %}>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% if 'display_name' not in fields.hidden %}
+        <div class="col-sm-6">
+            <div class="form-group ">
+                <label>Display Name</label>
+                <div class="input-group">
+                    <span class="input-group-addon"><i class="fa fa-edit"></i></span>
+                    <input type="text" class="form-control" name="display_name" autocomplete="off" value="{{target_token.display_name}}" placeholder="Please enter the display name" {% if 'display_name' in fields.disabled %}disabled{% endif %}>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <div class="col-sm-6">
+            <div class="form-group ">
+                <label>Last Sign-in</label>
+                <div class="input-group">
+                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                    <input type="text" class="form-control" name="last_sign_in_time" autocomplete="off" value="{% if target_token.last_sign_in_time %}{{target_token.last_sign_in_time | date('M j, Y g:i a')}}{% else %}Brand new!{% endif %}" disabled>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group ">
+                <label>Registered Since</label>
+                <div class="input-group">
+                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                    <input type="text" class="form-control" name="sign_up_time" autocomplete="off" value="{% if target_token.sign_up_time %}{{target_token.sign_up_time | date('M j, Y g:i a')}}{% else %}Unknown{% endif %}" disabled>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        {% if "submit" not in buttons.hidden %}
+        <div class="col-xs-8 col-sm-4">
+            <div class="vert-pad">
+                <button type="submit" class="btn btn-block btn-lg btn-success">
+                    {{submit_button}}
+                </button>
+            </div>
+        </div>
+        {% endif %}
+        {% if "edit" not in buttons.hidden %}
+        <div class="col-xs-6 col-sm-3">
+            <div class="vert-pad">
+                <button type="button" class="btn btn-block btn-md btn-primary js-token-edit" data-id="{{target_token.id}}" data-toggle="modal">
+                    <i class="fa fa-edit"></i> Edit
+                </button>
+            </div>
+        </div>
+        {% endif %}
+        {% if "enable" not in buttons.hidden %}
+        <div class="col-xs-6 col-sm-3">
+            <div class="vert-pad">
+                {% if target_token.flag_enabled == "1" %}
+                    <button type="button" class="btn btn-block btn-md btn-warning js-token-disable" data-id="{{target_token.id}}">
+                        <i class="fa fa-minus-circle"></i> Disable
+                    </button>
+                {% else %}
+                    <button type="button" class="btn btn-block btn-md btn-warning js-token-enable" data-id="{{target_token.id}}">
+                        <i class="fa fa-plus-circle"></i> Enable
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        {% if "delete" not in buttons.hidden %}
+        <div class="col-xs-6 col-sm-3">
+            <div class="vert-pad">
+                <button type="button" class="btn btn-block btn-md btn-danger js-token-delete" data-id="{{target_token.id}}" data-app_name="{{target_token.app_name}}" data-toggle="modal">
+                    <i class="fa fa-trash-o"></i> Delete
+                </button>
+            </div>
+        </div>
+        {% endif %}
+        {% if "cancel" not in buttons.hidden %}
+        <div class="col-xs-4 col-sm-3 pull-right">
+            <div class="vert-pad">
+                <button type="button" class="btn btn-block btn-lg btn-link" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</form>
+<script>
+// Load the validator rules for this form
+var validators = {{validators | raw}};
+</script>

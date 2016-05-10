@@ -11,6 +11,7 @@ use \Illuminate\Database\Capsule\Manager as Capsule;
  *
  * @package UserFrosting
  * @author Alex Weissman
+ * @author Johan Cwiklinski
  * @link http://www.userfrosting.com/navigating/#structure
  */
 class ApiController extends \UserFrosting\BaseController {
@@ -134,5 +135,72 @@ class ApiController extends \UserFrosting\BaseController {
             $this->_app->response->headers->set('Content-Type', 'application/json; charset=utf-8');
             echo json_encode($result, JSON_PRETTY_PRINT);
         }
+    }
+
+    /**
+     * Returns a list of Tokens
+     *
+     * Generates a list of tokens, optionally paginated, sorted and/or filtered.
+     * This page requires authentication.
+     * Request type: GET
+     *
+     * @return void
+     */
+    public function listTokens()
+    {
+        $get = $this->_app->request->get();
+
+        $size = isset($get['size']) ? $get['size'] : null;
+        $page = isset($get['page']) ? $get['page'] : null;
+        $sort_field = isset($get['sort_field']) ? $get['sort_field'] : "app_name";
+        $sort_order = isset($get['sort_order']) ? $get['sort_order'] : "asc";
+        $filters = isset($get['filters']) ? $get['filters'] : [];
+        $format = isset($get['format']) ? $get['format'] : "json";
+
+        // Access-controlled page
+        if (!$this->_app->user->checkAccess('uri_tokens')) {
+            $this->_app->halt(403);
+        }
+
+        $tokenQuery = new Token;
+
+        // Count unpaginated total
+        $total = $tokenQuery->count();
+
+
+        // Get unfiltered, unsorted, unpaginated collection
+        $token_collection = $tokenQuery->get();
+
+        // Load recent events for all users and merge into the collection.  This can't be done in one query,
+        // at least not efficiently.  See http://laravel.io/forum/04-05-2014-eloquent-eager-loading-to-limit-for-each-post
+        $last_sign_in_times = $token_collection->getRecentEvents('sign_in');
+        $last_sign_up_times = $token_collection->getRecentEvents('sign_up', 'sign_up_time');
+
+        // Count filtered results
+        $total_filtered = count($token_collection);
+
+        // Sort
+        if ($sort_order == "desc") {
+            $token_collection = $token_collection->sortByDesc($sort_field, SORT_NATURAL|SORT_FLAG_CASE);
+        } else {
+            $token_collection = $token_collection->sortBy($sort_field, SORT_NATURAL|SORT_FLAG_CASE);
+        }
+
+        // Paginate
+        if (($page !== null) && ($size !== null)) {
+            $offset = $size*$page;
+            $token_collection = $token_collection->slice($offset, $size);
+        }
+
+        $result = [
+            "count" => $total,
+            "rows"  => $token_collection->values()->toArray()
+        ];
+
+        //$query = Capsule::getQueryLog();
+
+        $this->_app->response->headers->set('Content-Type', 'application/json; charset=utf-8');
+
+        echo json_encode($result, JSON_PRETTY_PRINT);
     }
 }

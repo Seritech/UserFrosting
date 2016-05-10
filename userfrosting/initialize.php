@@ -89,6 +89,22 @@ $table_user_event = new \UserFrosting\DatabaseTable($app->config('db')['db_prefi
     "description"
 ]);
 
+$table_token = new \UserFrosting\DatabaseTable($app->config('db')['db_prefix'] . "token", [
+    "app_name",
+    "display_name",
+    "token",
+    "flag_enabled",
+    "created_at",
+    "updated_at"
+]);
+
+$table_token_event = new \UserFrosting\DatabaseTable($app->config('db')['db_prefix'] . "token_event", [
+    "token_id",
+    "event_type",
+    "occurred_at",
+    "description"
+]);
+
 $table_group = new \UserFrosting\DatabaseTable($app->config('db')['db_prefix'] . "group", [
     "name",
     "is_default",
@@ -106,6 +122,8 @@ $table_authorize_group = new \UserFrosting\DatabaseTable($app->config('db')['db_
 
 \UserFrosting\Database::setSchemaTable("user", $table_user);
 \UserFrosting\Database::setSchemaTable("user_event", $table_user_event);
+\UserFrosting\Database::setSchemaTable("token", $table_token);
+\UserFrosting\Database::setSchemaTable("token_event", $table_token_event);
 \UserFrosting\Database::setSchemaTable("group", $table_group);
 \UserFrosting\Database::setSchemaTable("group_user", $table_group_user);
 \UserFrosting\Database::setSchemaTable("configuration", $table_configuration);
@@ -263,6 +281,9 @@ $app->hook('includes.js.register', function () use ($app){
 
     // Users JS
     $app->schema->registerJS("user", "widget-users.js");
+
+    // Tokens JS
+    $app->schema->registerJS("token", "widget-tokens.js");
 
     // Groups JS
     $app->schema->registerJS("group", "widget-groups.js");
