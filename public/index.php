@@ -410,6 +410,11 @@
         $controller->listTokens();
     });
 
+    $app->post('/api/auth', function () use ($app) {
+        $controller = new UF\ApiController($app);
+        $controller->authenticate();
+    });
+
     /************ MISCELLANEOUS UTILITY ROUTES *************/
     
     // Generic confirmation dialog

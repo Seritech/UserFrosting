@@ -167,7 +167,6 @@ class ApiController extends \UserFrosting\BaseController {
         // Count unpaginated total
         $total = $tokenQuery->count();
 
-
         // Get unfiltered, unsorted, unpaginated collection
         $token_collection = $tokenQuery->get();
 
@@ -202,5 +201,127 @@ class ApiController extends \UserFrosting\BaseController {
         $this->_app->response->headers->set('Content-Type', 'application/json; charset=utf-8');
 
         echo json_encode($result, JSON_PRETTY_PRINT);
+    }
+
+    /**
+     * Authenticate user
+     *
+     * Request type: POST
+     *
+     * @return void
+     */
+    public function authenticate()
+    {
+        // Load the request schema
+        $requestSchema = new \Fortress\RequestSchema($this->_app->config('schema.path') . "/forms/apiauth.json");
+
+        // Get the alert message stream
+        $ms = $this->_app->alerts;
+
+        // Set up Fortress to process the request
+        $rf = new \Fortress\HTTPRequestFortress($ms, $requestSchema, $this->_app->request->get());
+
+        // Sanitize data
+        $rf->sanitize();
+
+        // Validate, and halt on validation errors.
+        if (!$rf->validate(true)) {
+            $this->_app->halt(400);
+        }
+
+        // Get the filtered data
+        $data = $rf->data();
+
+        try {
+            $token = new Token;
+            $check = $token->check(
+                $data['app_name'],
+                $data['api_token']
+            );
+
+            if (!$check) {
+                throw new \RuntimeException('Invalid API token');
+            }
+
+            $ufield = 'user_name';
+
+            // Determine whether we are trying to log in with an email address or a username
+            $isEmail = filter_var($data['user_name'], FILTER_VALIDATE_EMAIL);
+
+            // If it's an email address, but email login is not enabled, raise an error.
+            if ($isEmail && !$this->_app->site->email_login) {
+                throw new \RuntimeException('Email login is disabled');
+            } elseif ($isEmail) {
+                $ufield = 'email';
+            }
+
+            //retrieve user
+            $user = User::where($ufield, $data['user_name'])
+                ->where('flag_verified', 1)
+                ->where('flag_enabled', 1)
+                ->firstOrFail();
+
+            //check user password
+            if (!$user->verifyPassword($data['password'])) {
+                throw new \RuntimeException('Invalid password');
+            }
+
+            if ($user->id == $this->_app->config('user_id_master')) {
+                throw new \RuntimeException('No API login with root account');
+            }
+
+            $sent_group = $data['group'];
+            $groups = $user->groups->filter(function ($group) use ($sent_group) {
+                return $group->name === $sent_group;
+            });
+
+            if ($groups->count() !== 1) {
+                throw new \RuntimeException('Not member of group ' . $sent_group);
+            }
+
+            $this->authSuccess();
+        } catch (\Exception $e) {
+            $message = $e->getMessage();
+
+            if ($e instanceof \Illuminate\Database\Eloquent\ModelNotFoundException) {
+                //error message is not comprehensive for humans, rewrite it
+                $message = 'User not found';
+            }
+
+            $this->authFailed($message);
+        }
+    }
+
+    /**
+     * Response on API authentication fail
+     *
+     * @param string $message Error message
+     *
+     * @return void
+     */
+    private function authFailed($message)
+    {
+        $response = $this->_app->response;
+        $response->setStatus(403);
+        $response->headers->set('Content-Type', 'application/json');
+
+        $json = [
+            'auth'  => 'false',
+            'err'   => $message
+        ];
+        $response->write(json_encode($json, JSON_PRETTY_PRINT));
+    }
+
+    /**
+     * Response on API authentication success
+     *
+     * @return void
+     */
+    private function authSuccess()
+    {
+        $response = $this->_app->response;
+        $response->setStatus(200);
+        $response->headers->set('Content-Type', 'application/json');
+        $response->write(json_encode(['auth' => 'true'], JSON_PRETTY_PRINT));
     }
 }

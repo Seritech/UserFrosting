@@ -187,6 +187,23 @@ class Token extends UFModel
     }
 
     /**
+     * Create a new token check failed event.
+     *
+     * @param string $app_name Specified application name
+     *
+     * @return TokenEvent
+     */
+    public function newEventCheckFailed($app_name)
+    {
+        $event = new TokenEvent([
+            "event_type"  => "check_failed",
+            "description" => "Token for {$app_name} check failed at " . date("Y-m-d H:i:s") . "."
+        ]);
+        $this->new_events[] = $event;
+        return $event;
+    }
+
+    /**
      * Generate a new token reset event
      *
      * @return TokenEvent
@@ -240,19 +257,33 @@ class Token extends UFModel
     }
 
     /**
-     * Log this app in.  This basically updates the token's sign-in time.
+     * Check token validity. Fire sign-in event on success, check_failed on fail.
      *
-     * @return Token
+     * @param string $app_name Application name
+     * @param string $token    Provided token
+     *
+     * @return boolean
      */
-    public function login()
+    public function check($app_name, $token)
     {
-        // Add a sign in event (time is automatically set by database)
-        $this->newEventSignIn();
+        $check = false;
 
-        // Save changes
+        try {
+            $dbtoken = self::where('app_name', $app_name)
+                ->where('token', $token)
+                ->where('flag_enabled', 1)
+                ->firstOrFail();
+            $check = true;
+            $this->newEventSignIn();
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            $check = false;
+            $this->newEventCheckFailed($app_name);
+        }
+
+        //Save anyways, to get events updated
         $this->save();
 
-        return $this;
+        return $check;
     }
 
     /**
