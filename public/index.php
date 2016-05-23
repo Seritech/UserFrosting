@@ -413,7 +413,7 @@
     $app->post('/api/auth', function () use ($app) {
         $controller = new UF\ApiController($app);
         $controller->authenticate();
-    });
+    })->name('api_auth');
 
     /************ MISCELLANEOUS UTILITY ROUTES *************/
     

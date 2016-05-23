@@ -219,7 +219,7 @@ class ApiController extends \UserFrosting\BaseController {
         $ms = $this->_app->alerts;
 
         // Set up Fortress to process the request
-        $rf = new \Fortress\HTTPRequestFortress($ms, $requestSchema, $this->_app->request->get());
+        $rf = new \Fortress\HTTPRequestFortress($ms, $requestSchema, $this->_app->request->post());
 
         // Sanitize data
         $rf->sanitize();

@@ -58,6 +58,12 @@ class CsrfGuard extends \Slim\Middleware
      * @return void
      */
     public function check() {
+        // Do not check for external API calls
+        $pinfo = $this->app->request()->getPathInfo();
+        if ($pinfo === $this->app->urlFor('api_auth')) {
+            return;
+        }
+
         // Check sessions are enabled.
         if (session_id() === '') {
             throw new \Exception('Sessions are required to use the CSRF Guard middleware.');
