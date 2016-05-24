@@ -212,27 +212,27 @@ class ApiController extends \UserFrosting\BaseController {
      */
     public function authenticate()
     {
-        // Load the request schema
-        $requestSchema = new \Fortress\RequestSchema($this->_app->config('schema.path') . "/forms/apiauth.json");
-
-        // Get the alert message stream
-        $ms = $this->_app->alerts;
-
-        // Set up Fortress to process the request
-        $rf = new \Fortress\HTTPRequestFortress($ms, $requestSchema, $this->_app->request->post());
-
-        // Sanitize data
-        $rf->sanitize();
-
-        // Validate, and halt on validation errors.
-        if (!$rf->validate(true)) {
-            $this->_app->halt(400);
-        }
-
-        // Get the filtered data
-        $data = $rf->data();
-
         try {
+            // Load the request schema
+            $requestSchema = new \Fortress\RequestSchema($this->_app->config('schema.path') . "/forms/apiauth.json");
+
+            // Get the alert message stream
+            $ms = $this->_app->alerts;
+
+            // Set up Fortress to process the request
+            $rf = new \Fortress\HTTPRequestFortress($ms, $requestSchema, $this->_app->request->post());
+
+            // Sanitize data
+            $rf->sanitize();
+
+            // Validate, and halt on validation errors.
+            if (!$rf->validate(true)) {
+                throw new \RuntimeException('Invalid or incomplete request');
+            }
+
+            // Get the filtered data
+            $data = $rf->data();
+
             $token = new Token;
             $check = $token->check(
                 $data['app_name'],
