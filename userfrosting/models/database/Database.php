@@ -273,21 +273,22 @@ abstract class Database {
         // Setup default groups.  TODO: finish Group API so they can be created through objects
         $connection->insert("INSERT INTO `" . static::getSchemaTable('group')->name . "` (`name`, `is_default`, `can_delete`, `theme`, `landing_page`, `new_user_title`, `icon`) VALUES
           ('User', " . GROUP_DEFAULT_PRIMARY . ", 0, 'default', 'dashboard', 'New User', 'fa fa-user'),
-          ('Administrator', " . GROUP_NOT_DEFAULT . ", 0, 'nyx', 'dashboard', 'Brood Spawn', 'fa fa-flag'),
-          ('Zerglings', " . GROUP_NOT_DEFAULT . ", 1, 'nyx', 'dashboard', 'Tank Fodder', 'sc sc-zergling');");        
+          ('Administrator', " . GROUP_NOT_DEFAULT . ", 0, 'nyx', 'dashboard', 'Brood Spawn', 'fa fa-flag')");
     
         // Setup default authorizations
         $connection->insert("INSERT INTO `" . static::getSchemaTable('authorize_group')->name . "` (`group_id`, `hook`, `conditions`) VALUES
           (1, 'uri_dashboard', 'always()'),
           (2, 'uri_dashboard', 'always()'),
           (2, 'uri_users', 'always()'),
+          (2, 'uri_manage_groups', 'always()'),
           (1, 'uri_account_settings', 'always()'),
           (1, 'update_account_setting', 'equals(self.id, user.id)&&in(property,[\"email\",\"locale\",\"password\"])'),
           (2, 'update_account_setting', '!in_group(user.id,2)&&in(property,[\"email\",\"display_name\",\"title\",\"locale\",\"flag_password_reset\",\"flag_enabled\"])'),
           (2, 'view_account_setting', 'in(property,[\"user_name\",\"email\",\"display_name\",\"title\",\"locale\",\"flag_enabled\",\"groups\",\"primary_group_id\"])'),
           (2, 'delete_account', '!in_group(user.id,2)'),
           (2, 'create_account', 'always()');
-          (2, 'uri_tokens', 'always()');");
+          (2, 'uri_tokens', 'always()');
+          (2, 'uri_manage_groups', 'always()');");
     }
     
 }
