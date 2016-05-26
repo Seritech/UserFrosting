@@ -274,14 +274,17 @@ class Token extends UFModel
                 ->where('flag_enabled', 1)
                 ->firstOrFail();
             $check = true;
-            $this->newEventSignIn();
+            $dbtoken->newEventSignIn();
+            //Save anyways, to get events updated
+            $dbtoken->save();
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             $check = false;
             $this->newEventCheckFailed($app_name);
+            //Save anyways, to get events updated
+            foreach ($this->new_events as $event) {
+                $this->events()->save($event);
+            }
         }
-
-        //Save anyways, to get events updated
-        $this->save();
 
         return $check;
     }
