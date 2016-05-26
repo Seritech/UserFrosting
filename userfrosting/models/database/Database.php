@@ -124,7 +124,7 @@ abstract class Database {
     /**
      * Get an array of the names of tables that exist in the database.
      *
-     * Looks for tables with the following handles: user, group, group_user, authorize_group, authorize_user
+     * Looks for tables with the following handles: user, token, group, group_user, authorize_group, authorize_user
      * @return array[string] the names of the UF tables that actually exist.
      */ 
     public static function getCreatedTables(){
@@ -137,6 +137,8 @@ abstract class Database {
         $test_list = [
             static::getSchemaTable('user')->name,
             static::getSchemaTable('user_event')->name,
+            static::getSchemaTable('token')->name,
+            static::getSchemaTable('token_event')->name,
             static::getSchemaTable('group')->name,
             static::getSchemaTable('group_user')->name,
             static::getSchemaTable('authorize_user')->name,
@@ -235,7 +237,27 @@ abstract class Database {
             `description` text NOT NULL,
             PRIMARY KEY (`id`)
           ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
+
+        $connection->statement("CREATE TABLE IF NOT EXISTS `" . static::getSchemaTable('token')->name . "` (
+            `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+            `app_name` varchar(50) NOT NULL,
+            `display_name` varchar(50) NOT NULL,
+            `token` varchar(255) NOT NULL,
+            `flag_enabled` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'Set to ''1'' if the token is currently enabled, ''0'' otherwise.  Disabled tokens cannot be used to log in to, but they retain all of their data and settings.',
+            `created_at` timestamp NULL DEFAULT NULL,
+            `updated_at` timestamp NULL DEFAULT NULL,
+            PRIMARY KEY (`id`)
+          ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;");
         
+        $connection->statement("CREATE TABLE IF NOT EXISTS `" . static::getSchemaTable('user_event')->name . "` ( 
+            `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+            `token_id` int(10) unsigned,
+            `event_type` varchar(255) NOT NULL COMMENT 'An identifier used to track the type of event.',
+            `occurred_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            `description` text NOT NULL,
+            PRIMARY KEY (`id`)
+          ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
+
         $connection->statement("CREATE TABLE IF NOT EXISTS `" . static::$app->remember_me_table['tableName'] . "` (
             `user_id` int(11) NOT NULL,
             `token` varchar(40) NOT NULL,
